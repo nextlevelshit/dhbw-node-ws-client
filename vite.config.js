@@ -6,6 +6,9 @@ import { port } from "./src/config/constants.js";
 export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
+		fs: {
+			allow: ['./public'],
+		},
 		proxy: {
 			'/ws': {
 				target: `ws://localhost:${port}`,

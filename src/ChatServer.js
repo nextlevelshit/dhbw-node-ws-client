@@ -3,8 +3,8 @@ import {WebSocketServer, WebSocket} from "ws";
 import {Room} from "./Room.js";
 import debug from "debug";
 
-const logger = debug("app:i:chat-server");
-const verbose = debug("app:v:chat-server");
+const logger = debug("ws:i:chat-server");
+const verbose = debug("ws:v:chat-server");
 
 /**
  * ChatServer class handles the WebSocket server and its connections.

@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"start": "vite dev & node ./src/server.js",
+		"start": "DEBUG=app*,ws* vite dev & node ./src/server.js",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
@@ -33,6 +33,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@3d-dice/dice-box": "^1.0.12",
 		"ws": "^8.16.0"
 	}
 }

@@ -1,7 +1,7 @@
 import debug from "debug";
 
-const logger = debug("app:i:room");
-const verbose = debug("app:v:room");
+const logger = debug("ws:i:room");
+const verbose = debug("ws:v:room");
 
 /**
  * Room class represents a chat room.
