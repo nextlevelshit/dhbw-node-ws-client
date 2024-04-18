@@ -7,15 +7,15 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		fs: {
-			allow: ['./public'],
+			allow: ["./public"]
 		},
 		proxy: {
-			'/ws': {
+			"/ws": {
 				target: `ws://localhost:${port}`,
 				changeOrigin: true,
 				ws: true,
-				rewrite: (path) => path.replace(/^\/ws/, ''),
-			},
-		},
-	},
+				rewrite: (path) => path.replace(/^\/ws/, "")
+			}
+		}
+	}
 });

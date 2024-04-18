@@ -1,7 +1,9 @@
-import {v4 as uuid} from "uuid";
-import {WebSocketServer, WebSocket} from "ws";
-import {Room} from "./Room.js";
+import { v4 as uuid } from "uuid";
+import { WebSocketServer, WebSocket } from "ws";
+import { Room } from "./Room.js";
 import debug from "debug";
+import { createActor } from "xstate";
+import { State } from "./State.js";
 
 const logger = debug("ws:i:chat-server");
 const verbose = debug("ws:v:chat-server");
@@ -30,7 +32,7 @@ export class ChatServer {
 	 * @param {number} port - The port number for the WebSocket server
 	 */
 	constructor(port) {
-		this.wss = new WebSocketServer({port});
+		this.wss = new WebSocketServer({ port });
 		this.rooms = new Map();
 
 		this.wss.on("connection", (ws) => this.handleConnection(ws));
@@ -48,8 +50,8 @@ export class ChatServer {
 		 * @param {string} type
 		 * @param {object} data
 		 */
-		ws.sendEvent = (type, data) => ws.send(JSON.stringify({type, ...data}));
-		ws.sendEvent("connected", {clientId: ws.id, rooms: [...this.rooms.keys()]});
+		ws.sendEvent = (type, data) => ws.send(JSON.stringify({ type, ...data }));
+		ws.sendEvent("connected", { clientId: ws.id, rooms: [...this.rooms.keys()] });
 		logger(ws.id, "connected");
 
 		ws.on("message", (message) => this.handleMessage(ws, message));
@@ -69,7 +71,7 @@ export class ChatServer {
 			const event = JSON.parse(message);
 			this.handleEvent(event.type, ws, event);
 		} catch (e) {
-			ws.sendEvent("error", {message: e.message});
+			ws.sendEvent("error", { message: e.message });
 		}
 	}
 
@@ -99,28 +101,31 @@ export class ChatServer {
 			case "leave-room":
 				room && this.leaveRoom(ws, room);
 				break;
+			case "roll-result":
+				room.stateService.send({ type: "ROLL_RESULT", won: event.won, lost: event.lost, clientId: ws.id });
+				break;
 			case "message":
-				verbose({message: event.message});
+				verbose({ message: event.message });
 				if (room) {
-					room.broadcast("message", {message: event.message}, ws.id);
+					room.broadcast("message", { message: event.message }, ws.id);
 				} else {
-					ws.sendEvent("error", {message: "Not in a room", rooms: [...this.rooms.keys()]});
+					ws.sendEvent("error", { message: "Not in a room", rooms: [...this.rooms.keys()] });
 				}
 				break;
-			case "update":
-				room && room.updateContext(event.context);
-				break;
+			// case "update":
+			// 	room && room.updateContext(event.context);
+			// 	break;
 			case "rooms":
-				ws.sendEvent("rooms", {rooms: [...this.rooms.keys()]});
+				ws.sendEvent("rooms", { rooms: [...this.rooms.keys()] });
 				break;
 			case "clients":
-				room && ws.sendEvent("clients", {clients: [...room.clients.keys()]});
+				room && ws.sendEvent("clients", { clients: [...room.clients.keys()] });
 				break;
 			case "ping":
-				ws.sendEvent("pong", {clientId: ws.id, roomId: ws.roomId, clients: room ? [...room.clients.keys()] : []});
+				ws.sendEvent("pong", { clientId: ws.id, roomId: ws.roomId, clients: room ? [...room.clients.keys()] : [] });
 				break;
 			default:
-				ws.sendEvent("error", {message: "Invalid event type"});
+				ws.sendEvent("error", { message: "Invalid event type" });
 		}
 	}
 
@@ -133,7 +138,7 @@ export class ChatServer {
 		const room = this.rooms.get(ws.roomId);
 		room && this.leaveRoom(ws, room);
 		logger(ws.id, "disconnected");
-		verbose({room: ws.roomId});
+		verbose({ room: ws.roomId });
 	}
 
 	/**
@@ -142,13 +147,13 @@ export class ChatServer {
 	 * @param {WebSocket & {sendEvent:  (string, object) => void, roomId: string, id: string}} ws - The WebSocket instance for the connection.
 	 */
 	createRoom(ws) {
-		const room = new Room();
+		const room = new Room(createActor(State));
 		this.rooms.set(room.id, room);
 		ws.roomId = room.id;
-		ws.sendEvent("created-room", {id: room.id, passcode: room.passcode});
+		ws.sendEvent("created-room", { id: room.id, passcode: room.passcode });
 		logger("created room", room.id);
 		verbose(ws.id);
-		verbose({clients: room.clients.size});
+		verbose({ clients: room.clients.size });
 		room.join(ws);
 	}
 
@@ -166,7 +171,7 @@ export class ChatServer {
 			room.join(ws);
 			ws.roomId = roomId;
 		} else {
-			ws.sendEvent("error", {message: `Room with passcode ${passcode} not found`});
+			ws.sendEvent("error", { message: `Room with passcode ${passcode} not found` });
 		}
 	}
 
@@ -183,7 +188,7 @@ export class ChatServer {
 			room.join(ws);
 			ws.roomId = roomId;
 		} else {
-			ws.sendEvent("error", {message: `Room with id ${roomId} not found`});
+			ws.sendEvent("error", { message: `Room with id ${roomId} not found` });
 		}
 	}
 
@@ -200,15 +205,14 @@ export class ChatServer {
 			if (room.clients.size === 0) {
 				verbose("attempting to delete room", ws.roomId);
 				room.clients.clear();
-				room.context = {};
+				room.stateService.stop();
 				if (this.rooms.delete(ws.roomId)) {
 					logger("deleted room", ws.roomId);
 					delete ws.roomId;
 				}
 			}
-
 		} else {
-			ws.sendEvent("error", {message: "Not in a room"});
+			ws.sendEvent("error", { message: "not in a room" });
 		}
 	}
 }

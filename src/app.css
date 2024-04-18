@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 #dice canvas {
-    width: 100%;
-    height: 80%;
-    outline: none;
+	width: 100%;
+	height: 80%;
+	outline: none;
 }
 
-#messages pre:not(:nth-child(1)){
-    opacity: 0.2;
+#messages pre:not(:nth-child(1)) {
+	opacity: 0.2;
 }

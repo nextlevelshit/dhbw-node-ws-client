@@ -1,4 +1,6 @@
 import debug from "debug";
+import { Actor, createActor } from "xstate";
+import { State } from "./State.js";
 
 const logger = debug("ws:i:room");
 const verbose = debug("ws:v:room");
@@ -10,9 +12,9 @@ const verbose = debug("ws:v:room");
 export class Room {
 	/**
 	 * The context and game state of the room.
-	 * @type {object}
+	 * @type {Actor}
 	 */
-	context;
+	stateService;
 	/**
 	 * The clients connected to the room.
 	 * @type {Map<string, WebSocket & {sendEvent:  (string, object) => void, roomId: string, id: string}>}
@@ -21,7 +23,7 @@ export class Room {
 	/**
 	 * The four alphanumeric character long passcode for the room.
 	 * @type string
-	 */
+	 *
 	passcode;
 	/**
 	 * The unique identifier for the room.
@@ -46,13 +48,29 @@ export class Room {
 	 */
 	id;
 
-	constructor() {
+	/**
+	 * Creates an instance of Room.
+	 * @param stateService
+	 */
+	constructor(stateService) {
 		this.passcode = Math.random().toString(36).substring(2, 6).toUpperCase();
 		this.id = Buffer.from(this.passcode).toString("base64");
-		this.context = {};
 		this.clients = new Map();
+		this.stateService = stateService;
+		this.stateService.start();
 		logger(this.id, "new room");
-		verbose({passcode: this.passcode});
+		verbose({ passcode: this.passcode });
+		this.bootstrap();
+	}
+
+	bootstrap() {
+		this.stateService.subscribe((snapshot) => {
+			logger("state", snapshot?.value);
+			verbose("players", snapshot?.context.players);
+			verbose("currentPlayer", snapshot?.context.currentPlayer);
+			verbose("scores", snapshot?.context.scores);
+			this.broadcast("context", snapshot?.context);
+		});
 	}
 
 	/**
@@ -62,12 +80,12 @@ export class Room {
 	 */
 	join(ws) {
 		const clients = this.clients.set(ws.id, ws);
-		ws.sendEvent("joined-room", {clients: clients.size, passcode: this.passcode, id: this.id});
-		this.broadcast("user-joined", {clientId: ws.id, clients: clients.size}, ws.id);
+		ws.sendEvent("joined-room", { clients: clients.size, passcode: this.passcode, id: this.id });
+		this.broadcast("user-joined", { clientId: ws.id, clients: clients.size });
 		this.pulse(ws);
+		this.stateService.send({ type: "JOIN", clientId: ws.id });
 		logger("joined room", this.id);
-		verbose(ws.id);
-		verbose({clients: clients.size});
+		verbose({ clientId: ws.id, clients: clients.size });
 	}
 
 	/**
@@ -79,8 +97,9 @@ export class Room {
 	leave(clientId) {
 		const ws = this.clients.get(clientId);
 		if (ws && this.clients.delete(clientId)) {
-			ws.sendEvent("left-room", {passcode: this.passcode, id: this.id});
-			this.broadcast("user-left", {clientId, clients: this.clients.size}, ws.id);
+			this.stateService.send({ type: "LEAVE", clientId: ws.id });
+			ws.sendEvent("left-room", { passcode: this.passcode, id: this.id });
+			this.broadcast("user-left", { clientId, clients: this.clients.size });
 		}
 	}
 
@@ -91,26 +110,14 @@ export class Room {
 	 * @param {object} data - The message to send to the clients.
 	 * @param {string} clientId - The unique identifier for the client that sent the message.
 	 */
-	broadcast(type, data, clientId) {
-		[...this.clients.entries()].filter(([id]) => id !== clientId).forEach(([, ws]) => ws.sendEvent(type, {
-			clientId, ...data,
-			context: this.context
-		}));
-	}
-
-	/**
-	 * updateContext method is called to update the room's context.
-	 * It merges the existing context with the provided update.
-	 * @param {object} update - The update to apply to the context.
-	 */
-	updateContext(update) {
-		this.context = {...this.context, ...update};
+	broadcast(type, data) {
+		[...this.clients.entries()].forEach(([, ws]) => ws.sendEvent(type, data));
 	}
 
 	/**
 	 * @param {WebSocket & {sendEvent:  (string, object) => void, roomId: string, id: string}} ws - The WebSocket instance for the client.
 	 */
 	pulse(ws) {
-		ws.sendEvent("pulse", {context: this.context, clients: [...this.clients.keys()]});
+		ws.sendEvent("pulse", { context: this.stateService, clients: [...this.clients.keys()] });
 	}
 }
