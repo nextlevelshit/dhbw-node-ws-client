@@ -1,5 +1,5 @@
 import { assign, createMachine } from "xstate";
-import { initGameScore } from "./config/constants.js";
+import { initGameScore } from "../config/constants.js";
 import debug from "debug";
 
 const logger = debug("ws:i:state");

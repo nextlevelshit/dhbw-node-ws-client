@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocketServer } from "ws";
 import { Room } from "./Room.js";
 import debug from "debug";
 import { createActor } from "xstate";

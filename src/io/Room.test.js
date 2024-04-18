@@ -1,4 +1,4 @@
-import { Room } from "./Room";
+import { Room } from "./Room.js";
 import { jest, expect, describe, test, beforeEach } from "@jest/globals";
 
 describe("Room", () => {

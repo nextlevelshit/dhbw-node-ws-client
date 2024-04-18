@@ -14,6 +14,10 @@
 	let socket;
 	let currentRoom;
 
+	$: canRollDice = !!currentRoom;
+	$: canLeaveRoom = !!currentRoom;
+	$: canSendMessage = !!currentRoom;
+
 	function connect() {
 		socket = new WebSocket(`ws://${location.host}/ws`);
 
@@ -57,6 +61,7 @@
 	const leaveRoom = () => {
 		console.log("Leave room");
 		socket.send(`{"type":"leave-room"}`);
+		currentRoom = null;
 	};
 
 	const listRooms = () => {
@@ -140,37 +145,41 @@
 	});
 </script>
 
-<main class="container mx-auto">
-	<!--	<h1 class="text-xl font-semibold my-8">DHBW WebSocket Client</h1>-->
-	<!-- region Messages -->
-	<div id="messages" class="fixed bottom-20 top-20 left-10 right-10 rounded-md p-6">
-		{#each messages as message}
-			<pre class="text-pretty break-all font-mono">{message}</pre>
-		{/each}
-		{#if rooms.length > 0}
-			<div class="rooms my-8 grid gap-3 grid-cols-5">
-				{#each rooms as room (room)}
-					<button class="text-center bg-amber-200 rounded-md p-8 cursor-pointer" on:click={() => joinRoomById(room)}>{room}</button>
-				{/each}
-			</div>
-		{/if}
-	</div>
-	<!-- endregion -->
+<main class="ml-16">
+	<h1 class="text-xl font-semibold my-8">DHBW WebSocket Client</h1>
 	<!-- region Dice Canvases -->
 	<div class="w-full">
 		<div id="dice" class="absolute inset-0 w-full"></div>
 	</div>
 	<!-- endregion -->
+	<!-- region Messages -->
+	<div id="messages" class="fixed flex gap-8 bottom-20 top-20 left-10 right-10 rounded-md p-6">
+		<div class="w-2/3">
+			{#each messages as message}
+				<pre class="text-pretty break-all font-mono">{message}</pre>
+			{/each}
+		</div>
+		<div class="rooms w-1/3 flex flex-col gap-3">
+			{#if rooms.length > 0}
+				{#each rooms as room (room)}
+					<button class="text-center bg-amber-200 rounded-md p-8 cursor-pointer" on:click={() => joinRoomById(room)}>{room}</button>
+				{/each}
+			{/if}
+		</div>
+	</div>
+	<!-- endregion -->
 	<!-- region Button Bar -->
 	<section class="fixed rounded-lg shadow-lg bottom-0 right-0 p-6 bg-white my-8 grid grid-cols-2 gap-2 opacity-80 hover:opacity-100">
-		<form class="flex gap-2" on:submit|preventDefault={sendMessage}>
+		<form class="flex gap-2" on:submit|preventDefault={canSendMessage && sendMessage}>
 			<input
 				bind:value={message}
+				class:outline-violet-300={canSendMessage}
+				class="px-4 py-2 rounded-md flex-1 border-2"
+				disabled={!canSendMessage}
 				type="text"
-				class="px-4 py-2 rounded-md flex-1 border-2 outline-violet-300"
 				placeholder="Type your message"
 			/>
-			<button class="px-4 py-2 rounded-md bg-violet-300" id="sendButton">Send</button>
+			<button disabled={!canSendMessage} class:bg-violet-300={canSendMessage} class:text-violet-800={canSendMessage} class="px-4 py-2 rounded-md outline-2 text-gray-500" data-e2e="button-send">Send</button>
 		</form>
 		<form class="flex gap-2" on:submit|preventDefault={joinRoom}>
 			<input
@@ -181,14 +190,37 @@
 				class="uppercase px-4 py-2 rounded-md flex-1 border-2 outline-teal-300"
 				placeholder="XXXX"
 			/>
-			<button class="px-4 py-2 rounded-md bg-teal-300 text-teal-800">Join</button>
+			<button data-e2e="button-join" class="px-4 py-2 rounded-md bg-teal-300 text-teal-800">Join</button>
 		</form>
-		<button on:click={createRoom} class="px-4 py-2 rounded-md bg-amber-300 outline-2">Create room </button>
-		<button on:click={listRooms} class="px-4 py-2 rounded-md bg-amber-300 outline-2">List rooms</button>
-		<button on:click={ping} class="px-4 py-2 rounded-md bg-gray-300 outline-2">ping</button>
-		<button on:click={leaveRoom} class="px-4 py-2 rounded-md bg-red-300 text-red-800 outline-2">Leave </button>
-		<button on:click={rollDice} class="px-4 py-2 rounded-md bg-emerald-300 text-emerald-800 outline-2"> Roll dice </button>
-		<button on:click={clearDice} class="px-4 py-2 rounded-md bg-emerald-300 text-emerald-800 outline-2"> Clear dice </button>
+		<button on:click={createRoom} data-e2e="button-create-room" class="px-4 py-2 rounded-md bg-violet-300 text-violet-800 outline-2">Create room</button>
+		<button on:click={listRooms} data-e2e="button-list-rooms" class="px-4 py-2 rounded-md bg-teal-300 text-teal-800 outline-2">List rooms</button>
+		<button
+			on:click={canLeaveRoom && leaveRoom}
+			disabled={!canLeaveRoom}
+			class:bg-gray-800={canLeaveRoom}
+			class:text-white={canLeaveRoom}
+			class="px-4 py-2 rounded-md outline-2"
+			data-e2e="button-leave-room"
+		>Leave {currentRoom}
+		</button>
+		<button on:click={ping} data-e2e="button-ping" class="px-4 py-2 rounded-md bg-gray-800 text-white outline-2">ping</button>
+		<button
+			on:click={canRollDice && rollDice}
+			disabled={!canRollDice}
+			class:bg-indigo-300={canRollDice}
+			class:text-indigo-800={canRollDice}
+			class="px-4 py-2 rounded-md outline-2"
+			data-e2e="button-roll-dice"
+		>
+			Roll dice
+		</button>
+		<button
+			on:click={clearDice}
+			class="px-4 py-2 rounded-md outline-2 bg-indigo-300 text-indigo-800"
+			data-e2e="button-clear-dice"
+		>
+			Clear dice
+		</button>
 	</section>
 	<!-- endregion -->
 </main>
