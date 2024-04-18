@@ -1,6 +1,5 @@
 import debug from "debug";
-import { Actor, createActor } from "xstate";
-import { State } from "./State.js";
+import { Actor } from "xstate";
 
 const logger = debug("ws:i:room");
 const verbose = debug("ws:v:room");
@@ -26,24 +25,24 @@ export class Room {
 	 *
 	passcode;
 	/**
-	 * The unique identifier for the room.
-	 * It is generated from the passcode.
-	 * It is used to identify the room in the rooms map.
-	 * It is also used to send messages to the room.
-	 * It is sent to the client when they join the room.
-	 * It is used to leave the room when the client disconnects.
-	 * It is used to broadcast a user-left event to the other clients in the room.
-	 * It is used to create a new room when the client creates a room.
-	 * It is used to join a room when the client joins a room.
-	 * It is used to find the room when the client leaves a room.
-	 * It is used to find the room when the client sends a message to the room.
-	 * It is used to find the room when the client updates the room's context.
-	 * It is used to find the room when the client requests the list of rooms.
-	 * It is used to find the room when the client requests the list of clients in the room.
-	 * It is used to find the room when the client pings the server.
-	 * It is used to find the room when the client sends an invalid event type.
-	 * It is used to find the room when the client sends an error message.
-	 * It is used to find the room when the client sends a message to the room.
+	* The unique identifier for the room.
+	* It is generated from the passcode.
+	* It is used to identify the room in the rooms map.
+	* It is also used to send messages to the room.
+	* It is sent to the client when they join the room.
+	* It is used to leave the room when the client disconnects.
+	* It is used to broadcast a user-left event to the other clients in the room.
+	* It is used to create a new room when the client creates a room.
+	* It is used to join a room when the client joins a room.
+	* It is used to find the room when the client leaves a room.
+	* It is used to find the room when the client sends a message to the room.
+	* It is used to find the room when the client updates the room's context.
+	* It is used to find the room when the client requests the list of rooms.
+	* It is used to find the room when the client requests the list of clients in the room.
+	* It is used to find the room when the client pings the server.
+	* It is used to find the room when the client sends an invalid event type.
+	* It is used to find the room when the client sends an error message.
+	* It is used to find the room when the client sends a message to the room.
 	 * @type {string}
 	 */
 	id;
@@ -79,6 +78,11 @@ export class Room {
 	 * @param {WebSocket & {sendEvent:  (string, object) => void, roomId: string, id: string}} ws - The WebSocket instance for the client.
 	 */
 	join(ws) {
+		if (!ws?.id) {
+			verbose("connot join room without client id");
+			return;
+		}
+
 		const clients = this.clients.set(ws.id, ws);
 		ws.sendEvent("joined-room", { clients: clients.size, passcode: this.passcode, id: this.id });
 		this.broadcast("user-joined", { clientId: ws.id, clients: clients.size });
@@ -108,7 +112,6 @@ export class Room {
 	 * It sends the message to each client in the clients map.
 	 * @param {string} type - The event type
 	 * @param {object} data - The message to send to the clients.
-	 * @param {string} clientId - The unique identifier for the client that sent the message.
 	 */
 	broadcast(type, data) {
 		[...this.clients.entries()].forEach(([, ws]) => ws.sendEvent(type, data));
