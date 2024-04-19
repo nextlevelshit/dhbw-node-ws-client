@@ -22,7 +22,7 @@ export class Room {
 	/**
 	 * The four alphanumeric character long passcode for the room.
 	 * @type string
-	 *
+	 */
 	passcode;
 	/**
 	* The unique identifier for the room.
@@ -121,6 +121,6 @@ export class Room {
 	 * @param {WebSocket & {sendEvent:  (string, object) => void, roomId: string, id: string}} ws - The WebSocket instance for the client.
 	 */
 	pulse(ws) {
-		ws.sendEvent("pulse", { context: this.stateService, clients: [...this.clients.keys()] });
+		ws.sendEvent("pulse", { clients: [...this.clients.keys()] });
 	}
 }
