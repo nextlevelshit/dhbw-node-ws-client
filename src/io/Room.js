@@ -25,24 +25,24 @@ export class Room {
 	 */
 	passcode;
 	/**
-	* The unique identifier for the room.
-	* It is generated from the passcode.
-	* It is used to identify the room in the rooms map.
-	* It is also used to send messages to the room.
-	* It is sent to the client when they join the room.
-	* It is used to leave the room when the client disconnects.
-	* It is used to broadcast a user-left event to the other clients in the room.
-	* It is used to create a new room when the client creates a room.
-	* It is used to join a room when the client joins a room.
-	* It is used to find the room when the client leaves a room.
-	* It is used to find the room when the client sends a message to the room.
-	* It is used to find the room when the client updates the room's context.
-	* It is used to find the room when the client requests the list of rooms.
-	* It is used to find the room when the client requests the list of clients in the room.
-	* It is used to find the room when the client pings the server.
-	* It is used to find the room when the client sends an invalid event type.
-	* It is used to find the room when the client sends an error message.
-	* It is used to find the room when the client sends a message to the room.
+	 * The unique identifier for the room.
+	 * It is generated from the passcode.
+	 * It is used to identify the room in the rooms map.
+	 * It is also used to send messages to the room.
+	 * It is sent to the client when they join the room.
+	 * It is used to leave the room when the client disconnects.
+	 * It is used to broadcast a user-left event to the other clients in the room.
+	 * It is used to create a new room when the client creates a room.
+	 * It is used to join a room when the client joins a room.
+	 * It is used to find the room when the client leaves a room.
+	 * It is used to find the room when the client sends a message to the room.
+	 * It is used to find the room when the client updates the room's context.
+	 * It is used to find the room when the client requests the list of rooms.
+	 * It is used to find the room when the client requests the list of clients in the room.
+	 * It is used to find the room when the client pings the server.
+	 * It is used to find the room when the client sends an invalid event type.
+	 * It is used to find the room when the client sends an error message.
+	 * It is used to find the room when the client sends a message to the room.
 	 * @type {string}
 	 */
 	id;

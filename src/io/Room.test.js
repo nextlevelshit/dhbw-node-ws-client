@@ -48,8 +48,8 @@ describe("Room", () => {
 
 	test("should broadcast a message to all clients", () => {
 		room.join(ws);
-		room.broadcast("message", { message: "Hallöchen"});
-		expect(ws.sendEvent).toBeCalledWith("message", { message: "Hallöchen"});
+		room.broadcast("message", { message: "Hallöchen" });
+		expect(ws.sendEvent).toBeCalledWith("message", { message: "Hallöchen" });
 	});
 
 	test("should handle multiple clients joining the room", () => {
@@ -84,24 +84,21 @@ describe("Room", () => {
 	});
 
 	test("should not broadcast a message if there are no clients", () => {
-		room.broadcast("message", { message: "Hallöchen"});
+		room.broadcast("message", { message: "Hallöchen" });
 		expect(ws.sendEvent).not.toBeCalled();
 	});
 
-	test("should not crash when leave is called and there are no clients", () => {
-	});
+	test("should not crash when leave is called and there are no clients", () => {});
 
-	test("should not crash when leave is called with a null id", () => {
-	});
+	test("should not crash when leave is called with a null id", () => {});
 
-	test("should not crash when join is called with a null WebSocket", () => {
-	});
+	test("should not crash when join is called with a null WebSocket", () => {});
 
 	test("should send pulse event to client", () => {
 		room.join(ws);
 		expect(room.clients.keys()).toContain(ws.id);
 		room.pulse(ws);
-		expect(ws.sendEvent).toBeCalledWith("pulse", { clients: [ws.id]});
+		expect(ws.sendEvent).toBeCalledWith("pulse", { clients: [ws.id] });
 	});
 
 	// test("should subscribe to stateService updates and broadcast context", () => {
@@ -133,6 +130,6 @@ describe("Room", () => {
 	test("should call stateService with JOIN when a client joins the room", () => {
 		room.join(ws);
 		expect(room.clients.keys()).toContain(ws.id);
-		expect(room.stateService.send).toBeCalledWith({ type: "JOIN", clientId: ws.id});
+		expect(room.stateService.send).toBeCalledWith({ type: "JOIN", clientId: ws.id });
 	});
 });

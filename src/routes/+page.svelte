@@ -154,7 +154,7 @@
 	<!-- endregion -->
 	<!-- region Messages -->
 	<div class="fixed flex gap-8 bottom-20 top-20 left-10 right-10 rounded-md p-6">
-		<div class="w-2/3" id="messages" >
+		<div class="w-2/3" id="messages">
 			{#each messages as message}
 				<pre class="text-pretty break-all font-mono">{message}</pre>
 			{/each}
@@ -180,7 +180,13 @@
 				type="text"
 				placeholder="Type your message"
 			/>
-			<button disabled={!canSendMessage} class:bg-violet-300={canSendMessage} class:text-violet-800={canSendMessage} class="px-4 py-2 rounded-md outline-2 text-gray-500" data-e2e="button-send">Send</button>
+			<button
+				disabled={!canSendMessage}
+				class:bg-violet-300={canSendMessage}
+				class:text-violet-800={canSendMessage}
+				class="px-4 py-2 rounded-md outline-2 text-gray-500"
+				data-e2e="button-send">Send</button
+			>
 		</form>
 		<form class="flex gap-2" on:submit|preventDefault={joinRoom}>
 			<input
@@ -193,8 +199,12 @@
 			/>
 			<button data-e2e="button-join" class="px-4 py-2 rounded-md bg-teal-300 text-teal-800">Join</button>
 		</form>
-		<button on:click={createRoom} data-e2e="button-create-room" class="px-4 py-2 rounded-md bg-violet-300 text-violet-800 outline-2">Create room</button>
-		<button on:click={listRooms} data-e2e="button-list-rooms" class="px-4 py-2 rounded-md bg-teal-300 text-teal-800 outline-2">List rooms</button>
+		<button on:click={createRoom} data-e2e="button-create-room" class="px-4 py-2 rounded-md bg-violet-300 text-violet-800 outline-2"
+			>Create room</button
+		>
+		<button on:click={listRooms} data-e2e="button-list-rooms" class="px-4 py-2 rounded-md bg-teal-300 text-teal-800 outline-2"
+			>List rooms</button
+		>
 		<button
 			on:click={canLeaveRoom && leaveRoom}
 			disabled={!canLeaveRoom}
@@ -202,7 +212,7 @@
 			class:text-white={canLeaveRoom}
 			class="px-4 py-2 rounded-md outline-2"
 			data-e2e="button-leave-room"
-		>Leave {currentRoom}
+			>Leave {currentRoom}
 		</button>
 		<button on:click={ping} data-e2e="button-ping" class="px-4 py-2 rounded-md bg-gray-800 text-white outline-2">ping</button>
 		<button
@@ -215,11 +225,7 @@
 		>
 			Roll dice
 		</button>
-		<button
-			on:click={clearDice}
-			class="px-4 py-2 rounded-md outline-2 bg-indigo-300 text-indigo-800"
-			data-e2e="button-clear-dice"
-		>
+		<button on:click={clearDice} class="px-4 py-2 rounded-md outline-2 bg-indigo-300 text-indigo-800" data-e2e="button-clear-dice">
 			Clear dice
 		</button>
 	</section>
