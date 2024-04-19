@@ -153,8 +153,8 @@
 	</div>
 	<!-- endregion -->
 	<!-- region Messages -->
-	<div id="messages" class="fixed flex gap-8 bottom-20 top-20 left-10 right-10 rounded-md p-6">
-		<div class="w-2/3">
+	<div class="fixed flex gap-8 bottom-20 top-20 left-10 right-10 rounded-md p-6">
+		<div class="w-2/3" id="messages" >
 			{#each messages as message}
 				<pre class="text-pretty break-all font-mono">{message}</pre>
 			{/each}
@@ -175,6 +175,7 @@
 				bind:value={message}
 				class:outline-violet-300={canSendMessage}
 				class="px-4 py-2 rounded-md flex-1 border-2"
+				data-e2e="input-message"
 				disabled={!canSendMessage}
 				type="text"
 				placeholder="Type your message"
