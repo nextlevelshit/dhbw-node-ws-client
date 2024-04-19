@@ -22,12 +22,12 @@
 		socket = new WebSocket(`ws://${location.host}/ws`);
 
 		socket.onopen = () => {
-			console.log("WebSocket connection established.");
+			info("WebSocket connection established.");
 		};
 
 		socket.onmessage = (message) => {
 			const event = JSON.parse(message.data);
-			console.log("Received message:", event.type);
+			info("Received message:", event.type);
 			messages = [message.data, ...messages];
 
 			if ("connected" === event.type || "rooms" === event.type) {
@@ -37,12 +37,12 @@
 
 			if ("joined-room" === event.type) {
 				currentRoom = event.id;
-				console.log("Joined room", event.id);
+				info("Joined room", event.id);
 			}
 		};
 
 		socket.onclose = () => {
-			console.log("WebSocket connection closed.");
+			info("WebSocket connection closed.");
 		};
 	}
 
@@ -54,28 +54,28 @@
 	};
 
 	const createRoom = () => {
-		console.log("Create room");
+		info("Create room");
 		socket.send(`{"type":"create-room"}`);
 	};
 
 	const leaveRoom = () => {
-		console.log("Leave room");
+		info("Leave room");
 		socket.send(`{"type":"leave-room"}`);
 		currentRoom = null;
 	};
 
 	const listRooms = () => {
-		console.log("Create room");
+		info("Create room");
 		socket.send(`{"type":"rooms"}`);
 	};
 
 	const ping = () => {
-		console.log("ping");
+		info("ping");
 		socket.send(`{"type":"ping"}`);
 	};
 
 	const joinRoom = () => {
-		console.log("Join room");
+		info("Join room");
 		if (passcode.trim() !== "") {
 			socket.send(`{"type":"join-room","passcode":"${passcode}"}`);
 			passcode = "";
@@ -83,7 +83,7 @@
 	};
 
 	const joinRoomById = (roomId) => {
-		console.log("Join room by id", roomId);
+		info("Join room by id", roomId);
 		socket.send(`{"type":"join-room-by-id", "id": "${roomId}"}`);
 	};
 
